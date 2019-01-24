@@ -73,5 +73,89 @@ namespace ASP.NET.Controllers
                 }, JsonRequestBehavior.AllowGet);
             }
         }
+        [HttpPost]
+        public JsonResult Add(CategoryViewModel model)
+        {
+            try
+            {
+                var db = new NorthwindEntities();
+                db.Categories.Add(new Category()
+                {
+                    CategoryName = model.CategoryName,
+                    Description = model.Description
+                });
+                db.SaveChanges();
+                return Json(new ResponseData()
+                {
+                    message = $"{model.CategoryName} ismindeki kategori basariyla eklendi",
+                    success = true
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new ResponseData()
+                {
+                    message = $"Bir hata olustu {ex.Message}",
+                    success = false
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public JsonResult Delete(int id)
+        {
+            try
+            {
+                var db = new NorthwindEntities();
+                var cat = db.Categories.Find(id);
+                db.Categories.Remove(cat);
+                db.SaveChanges();
+                return Json(new ResponseData()
+                {
+                    message = $"{cat.CategoryName} ismindeki kategori basariyla silindi",
+                    success = true
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new ResponseData()
+                {
+                    message = $"Kategori silme isleminde hata {ex.Message}",
+                    success = false
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public JsonResult Update(Category model)
+        {
+            try
+            {
+                var db = new NorthwindEntities();
+                var cat = db.Categories.Find(model.CategoryID);
+                if (cat == null)
+                {
+                    return Json(new ResponseData()
+                    {
+                        message = $"Kategori bulunamadi",
+                        success = false
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                cat.Description = model.Description;
+                cat.CategoryName = model.CategoryName;
+                db.SaveChanges();
+                return Json(new ResponseData()
+                {
+                    message = $"{cat.CategoryName} ismindeki kategori basariyla guncellendi",
+                    success = true
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new ResponseData()
+                {
+                    message = $"Kategori guncelleme isleminde hata {ex.Message}",
+                    success = false
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }
