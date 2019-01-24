@@ -155,6 +155,57 @@ namespace ASP.NET.Controllers
                 }, JsonRequestBehavior.AllowGet);
             }
         }
+        [HttpGet]
+        public JsonResult CategorySearch(int? id)
+        {
+            
+            try
+            {
+                var db = new NorthwindEntities();
+                List<ProductViewModel> data;
+                if (id != null)
+                {
+                    data = db.Products.OrderBy(x => x.ProductName).ToList().Where(x=>x.CategoryID==id.Value)
+                        .Select(x => new ProductViewModel()
+                        {
+                            CategoryName=x.Category?.CategoryName,
+                            ProductName = x.ProductName,
+                            SupplierID = x.SupplierID,
+                            ProductID = x.ProductID,
+                            CategoryID = x.CategoryID,
+                            QuantityPerUnit = x.QuantityPerUnit,
+                            UnitPrice = x.UnitPrice,
+                            UnitsInStock = x.UnitsInStock,
+                            UnitsOnOrder = x.UnitsOnOrder,
+                            ReorderLevel = x.ReorderLevel,
+                            Discontinued = x.Discontinued
+
+                        }).ToList();
+                    return Json(new ResponseData()
+                    {
+                        success = true,
+                        data = data
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new ResponseData()
+                    {
+                        message = "Kategori Seciniz",
+                        success = false,
+
+                    }, JsonRequestBehavior.AllowGet);
+                }              
+            }
+            catch (Exception ex)
+            {
+                return Json(new ResponseData()
+                {
+                    message = $"Bir hata olustu {ex.Message}",
+                    success = false
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
         [HttpPost]
         public JsonResult Add(ProductViewModel model)
         {

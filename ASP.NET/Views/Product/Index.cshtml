@@ -328,11 +328,32 @@
                             .append(td9).append(td11).appendTo($("#resultbody"));
                     });
             }
-
+            var id;
             $("#cmbCategory").change(function() {
-                var id= $(this).val();
+                id = $(this).val(),
+                    $.ajax({
 
-                console.log($("#cmbCategory option:selected").val());
+                    url: "@Url.Action("CategorySearch", "Product", new { id = "id" })".replace("id",id),
+                    method: "get",
+                    dataType: "json"
+
+                }).done(function (e) {
+                    if (e.success) {
+                        $('#cmbProduct').empty();
+                        
+                        $.each(e.data, function (key, value) {
+                            renderdataa(e.data);
+                            $("#resultdiv").show(600);
+                            $('#cmbProduct')
+                                .append($("<option></option>")
+                                    .attr("value", value.ProductID)
+                                    .text(value.ProductName));
+                            
+                        });
+                    }
+                });
+
+                
             });
 
 
