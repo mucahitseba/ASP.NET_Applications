@@ -1,0 +1,346 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<br />
+<br />
+<br />
+<div class="container">
+    <div class="row"></div>
+    <div class="row">
+        <div class="col-md-6">
+            <select id="cmbCategory" class="form-control"></select>
+        </div>
+    </div>
+</div>
+<br />
+<br />
+<br />
+<div class="container">
+    <form class="form-inline" id="frmAdd">
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtProductName" placeholder="ProductName">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtSupplierID" placeholder="SupplierID">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtCategoryID" placeholder="CategoryID">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtQuantityPerUnit" placeholder="QuantityPerUnit">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtUnitPrice" placeholder="UnitPrice">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtUnitsInStock" placeholder="UnitsInStock">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtUnitsOnOrder" placeholder="UnitsOnOrder">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtReorderLevel" placeholder="ReorderLevel">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtDiscontinued" placeholder="Discontinued">
+        </div>
+        <button type="submit" class="btn btn-info">Ürün Ekle</button>
+    </form>
+    <form class="form-inline" id="frmUpdate" style="display:none">
+        <input type="hidden" id="ProductID" />
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtProductName2" placeholder="ProductName2">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtSupplierID2" placeholder="SupplierID2">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtCategoryID2" placeholder="CategoryID2">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtQuantityPerUnit2" placeholder="QuantityPerUnit2">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtUnitPrice2" placeholder="UnitPrice2">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtUnitsInStock2" placeholder="UnitsInStock2">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtUnitsOnOrder2" placeholder="UnitsOnOrder2">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtReorderLevel2" placeholder="ReorderLevel2">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="txtDiscontinued2" placeholder="Discontinued2">
+        </div>
+        <button type="submit" class="btn btn-info">Ürün Güncelle</button>
+        <div id="messagediv2"></div>
+    </form>
+    <div class="row" id="searchdiv">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="col-lg-8">
+                <div class="input-group  input-group-lg">
+                    <input type="text" id="txtsearch" class="form-control" placeholder="Search for...">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </span>
+                </div><!-- /input-group -->
+                <div id="resultmessage"></div>
+            </div><!-- /.col-lg-6 -->
+        </div>
+    </div>
+    <div class="row" id="resultdiv">
+        <div class="col-md-10 col-md-offset-1">
+            <table class="table table-responsive table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>ProductName</th>
+                        <th>SupplierId</th>
+                        <th>CategoryID</th>
+                        <th>QuantityPerUnit</th>
+                        <th>UnitPrice</th>
+                        <th>UnitsInStock</th>
+                        <th>UnitsOnOrder</th>
+                        <th>ReorderLevel</th>
+                        <th>Discontinued</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="resultbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+
+        $(function () {
+            function arama() {
+                    $.ajax({
+                        url: "@Url.Action("Search", "Product", new { s="*"})",
+                        method: "get",
+                        dataType: "json"
+                    }).done(function (e) {
+                        if (e.success) {
+                            renderdataa(e.data);
+                            $("resultdiv").show(600);
+                        }
+                        else {
+                            alert(e.message);
+                        }
+                        });
+            };
+            function init() {
+                $.ajax({
+                    url: "@Url.Action("GetAllCategories","Product")",
+                    method: "get",
+                    dataType: "json"
+                }).done(function(e) {
+                    if (e.success) {
+                        $('#cmbCategory').empty();
+                        $('#cmbCategory')
+                            .append($("<option></option>")
+                                .attr("value",0)
+                                .text("Kategorisi Yok"));
+                        $.each(e.data, function(key, value) {
+                            $('#cmbCategory')
+                                .append($("<option></option>")
+                                    .attr("value",value.CategoryID)
+                                    .text(value.CategoryName));
+                        });
+                    }
+                    });
+
+            }
+            $("#frmAdd").submit(function (ev) {
+                ev.preventDefault();
+                var data = {
+                    ProductName: $("#txtProductName").val(),
+                    SupplierID: $("#txtSupplierID").val(),
+                    CategoryID: $("#txtCategoryID").val(),
+                    QuantityPerUnit: $("#txtQuantityPerUnit").val(),
+                    UnitPrice: $("#txtUnitPrice").val(),
+                    UnitsInStock: $("#txtUnitsInStock").val(),
+                    UnitsOnOrder: $("#txtUnitsOnOrder").val(),
+                    ReorderLevel: $("#txtReorderLevel").val(),
+                    Discontinued: $("#txtDiscontinued").val(),
+                    
+
+                }
+                $.ajax({
+                    url: '@Url.Action("Add","Product")',
+                    method: "post",
+                    dataType: "json",
+                    data:data
+                }).done(function(e) {
+                    alert(e.message);
+                });
+            });
+            $("#frmUpdate").submit(function(ev) {
+                ev.preventDefault();
+                var data = {
+                    ProductName: $("#txtProductName2").val(),
+                    SupplierID: $("#txtSupplierID2").val(),
+                    CategoryID: $("#txtCategoryID2").val(),
+                    QuantityPerUnit: $("#txtQuantityPerUnit2").val(),
+                    UnitPrice: $("#txtUnitPrice2").val(),
+                    UnitsInStock: $("#txtUnitsInStock2").val(),
+                    UnitsOnOrder: $("#txtUnitsOnOrder2").val(),
+                    ReorderLevel: $("#txtReorderLevel2").val(),
+                    Discontinued: $("#txtDiscontinued2").val(),
+                    ProductID: $("#ProductID").val()
+                };
+                $.ajax({
+                    url: '@Url.Action("Update","Product")',
+                    method: "post",
+                    dataType: "json",
+                    data: data
+                }).done(function(e) {
+                    alert(e.message);
+                    if (e.success) {
+                        arama();
+                        $("#frmUpdate").hide();
+                        $("#frmAdd").show(400);
+                    }
+                });
+            });
+            $("#resultdiv").hide();
+            $("#txtsearch").keyup(function (e) {
+                $("#resultmessage").hide();
+                $("#resultdiv").hide();
+                var key = $(this).val();
+                if (key.length < 3)
+                    return;
+
+                $.ajax({
+                    url: '@Url.Action("Search","Product")' + "?s=" + key,
+                    method: "GET",
+                    dataType:"json"
+                }).done(function (e) {
+                    $("#resultmessage").fadeIn(400);
+                    if (e.success) {
+                        $("#resultmessage").html("<span class='text text-success'><h2>" + e.message + "</h2></span>");
+                        if (e.data.length > 0) {
+                            renderdataa(e.data);
+                            $("#resultdiv").show(600);
+                        }
+                    } else {
+                        $("#resultmessage").html("<span class='text text-danger'><h2>" + e.message + "</h2></span>");
+                    }
+                });
+            });
+            function renderdataa(data) {
+                $("#resultbody").empty();
+                $.each(data,
+                    function (key, value) {
+                        var tr = document.createElement("tr");
+                        var th = document.createElement("th");
+                        th.innerText = key + 1;
+                        var td = document.createElement("td");
+                        td.innerText = value.ProductName;
+                        var td2 = document.createElement("td");
+                        td2.innerText = value.SupplierID;
+                        var td3 = document.createElement("td");
+                        td3.innerText = value.CategoryID;
+                        var td4 = document.createElement("td");
+                        td4.innerText = value.QuantityPerUnit;
+                        var td5 = document.createElement("td");
+                        td5.innerText = value.UnitPrice;
+                        var td6 = document.createElement("td");
+                        td6.innerText = value.UnitsInStock;
+                        var td7 = document.createElement("td");
+                        td7.innerText = value.UnitsOnOrder;
+                        var td8 = document.createElement("td");
+                        td8.innerText = value.ReorderLevel;
+                        var td9 = document.createElement("td");
+                        td9.innerText = value.Discontinued;
+                        
+
+                        var td11 = document.createElement("td");
+                        var a = document.createElement("a");
+                        $(a).attr("href", "@Url.Action("Detail", "Product")" + "/" + value.ProductID).attr("class", "btn btn-success").html("Detail");
+
+                        var btnSil = document.createElement("input");
+                        $(btnSil).attr({
+                            "type": "button",
+                            "class": "btn btn-danger",
+                            "value": "Delete",
+                            "name": value.ProductID
+                        }).on("click", function () {
+                            var id = this.name;
+                            $.ajax({
+                                url: "@Url.Action("Delete","Product")",
+                                method: "post",
+                                dataType: "json",
+                                data: {id:id}
+                            }).done(function(e) {
+                                alert(e.message);
+                                arama();
+                            });
+                        });
+                        var btnGuncelle = document.createElement("input");
+                        $(btnGuncelle).attr({
+                            "type": "button",
+                            "class": "btn btn-warning",
+                            "value": "Update",
+                            "name": value.ProductID
+                        }).on("click",
+                            function () {
+                                var productId = this.name;
+                                var satir = $(this).parent().parent()[0].childNodes;
+                                var productName = satir[1].innerText;
+                                var supplierID = satir[2].innerText;
+                                var categoryID = satir[3].innerText;
+                                var quantityPerUnit = satir[4].innerText;
+                                var unitPrice = satir[5].innerText;
+                                var unitsInStock = satir[6].innerText;
+                                var unitsOnOrder = satir[7].innerText;
+                                var reorderLevel = satir[8].innerText;
+                                var discontinued = satir[9].innerText;
+                                $("#ProductID").val(productId);
+                                $("#txtProductName2").val(productName);
+                                $("#txtSupplierID2").val(supplierID);
+                                $("#txtCategoryID2").val(categoryID);
+                                $("#txtQuantityPerUnit2").val(quantityPerUnit);
+                                $("#txtUnitPrice2").val(unitPrice);
+                                $("#txtUnitsInStock2").val(unitsInStock);
+                                $("#txtUnitsOnOrder2").val(unitsOnOrder);
+                                $("#txtReorderLevel2").val(reorderLevel);
+                                $("#txtDiscontinued2").val(discontinued);
+                                
+                                $("#frmAdd").hide();
+                                $("#frmUpdate").show(400);
+                            });
+
+                        $(a).appendTo(td11);
+                        $(btnSil).appendTo(td11);
+                        $(btnGuncelle).appendTo(td11);
+
+                        $(tr).append(th).append(td).append(td2).append(td3).append(td4)
+                            .append(td5).append(td6).append(td7).append(td8)
+                            .append(td9).append(td11).appendTo($("#resultbody"));
+                    });
+            }
+
+            $("#cmbCategory").change(function() {
+                var id= $(this).val();
+
+                console.log($("#cmbCategory option:selected").val());
+            });
+
+
+            init();
+            arama();
+
+
+        });
+    </script>
+}
+
