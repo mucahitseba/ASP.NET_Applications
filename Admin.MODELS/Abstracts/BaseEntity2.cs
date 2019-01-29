@@ -8,12 +8,10 @@ using System.Threading.Tasks;
 
 namespace Admin.MODELS.Abstracts
 {
-    public abstract class BaseEntity<T>
+    public abstract class BaseEntity2<T1,T2>:BaseEntity<T1>
     {
         [Key]
-        [Column(Order =1)]
-        public T Id { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public DateTime? UpdatedDate { get; set; }
+        [Column(Order =2)]
+        public T2 Id2 { get; set; }
     }
 }

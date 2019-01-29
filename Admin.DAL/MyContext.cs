@@ -18,7 +18,10 @@ namespace Admin.DAL
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Category>().Property(x => x.TaxRate).HasPrecision(3, scale: 2);
+            modelBuilder.Entity<Product>().Property(x => x.BuyPrice).HasPrecision(7, scale: 2);
+            modelBuilder.Entity<Product>().Property(x => x.SalesPrice).HasPrecision(7, scale: 2);
         }
         public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
     }
 }
