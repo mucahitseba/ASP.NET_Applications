@@ -9,13 +9,19 @@ using System.Threading.Tasks;
 
 namespace Admin.BLL.Repository
 {
-    public abstract class RepositoryBase<T,TId> where T:BaseEntity<TId>
+    public abstract class RepositoryBase<T,TId>:IDisposable where T:BaseEntity<TId>
     {
-        protected internal static MyContext DbContext;
+        internal static MyContext DbContext;
         private static DbSet<T> DbObject;
+
+        public bool IsDisposed { get; set; }
+
         protected RepositoryBase()
         {
             DbContext = DbContext ?? new MyContext();
+            TimeSpan dd = DateTime.Now - DbContext.InstanceDate;
+            if (IsDisposed) DbContext = new MyContext();
+            if (dd.TotalMinutes > 30) DbContext = new MyContext();
             DbObject = DbContext.Set<T>();
         }
 
@@ -90,6 +96,10 @@ namespace Admin.BLL.Repository
             entity.UpdatedDate = DateTime.Now;
             this.Update();
         }
-
+        public void Dispose()
+        {
+            GC.SuppressFinalize(obj: this);
+            this.IsDisposed = true;
+        }
     }
 }

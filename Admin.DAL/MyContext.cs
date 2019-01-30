@@ -12,8 +12,9 @@ namespace Admin.DAL
     {
         public MyContext():base(nameOrConnectionString:"name=MyCon")
         {
-
+            this.InstanceDate = DateTime.Now;
         }
+        public DateTime InstanceDate { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
