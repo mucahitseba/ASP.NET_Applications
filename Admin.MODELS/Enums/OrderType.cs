@@ -1,8 +1,12 @@
-﻿namespace Admin.MODELS.Enums
+﻿using System.ComponentModel;
+
+namespace Admin.MODELS.Enums
 {
     public enum OrderType
     {
+        [Description("Alış")]
         Buying=10,
-        Selling=20
+        [Description("Satış")]
+        Selling =20
     }
 }

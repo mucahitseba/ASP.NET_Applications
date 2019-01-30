@@ -1,9 +1,12 @@
-﻿namespace Admin.MODELS.Enums
+﻿using System.ComponentModel;
+
+namespace Admin.MODELS.Enums
 {
     public enum ProductTypes
     {
-        
-        Bulk=10,
-        Retail=100
+        [Description("Toptan")]
+        Bulk =10,
+        [Description("Perakende")]
+        Retail =100
     }
 }
