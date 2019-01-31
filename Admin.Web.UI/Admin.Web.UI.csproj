@@ -239,6 +239,7 @@
     <Content Include="Views\Home\Error.cshtml" />
     <Content Include="Views\Category\Update.cshtml" />
     <Content Include="Views\Product\Add.cshtml" />
+    <Content Include="Views\Product\Update.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

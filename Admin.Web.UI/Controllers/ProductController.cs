@@ -69,5 +69,97 @@ namespace Admin.Web.UI.Controllers
                 return RedirectToAction("Error", "Home");
             }
         }
+        [HttpGet]
+        public ActionResult Update(Guid id)
+        {
+            ViewBag.ProductList = GetProductSelectList();
+            ViewBag.CategoryList = GetCategorySelectList();
+            var data = new ProductRepo().GetById(id);
+            if (data == null)
+            {
+                TempData["Model"] = new ErrorViewModel()
+                {
+                    Text = $"Ürün bulunamadı",
+                    ActionName = "Add",
+                    ControllerName = "Product",
+                    ErrorCode = 404
+                };
+                return RedirectToAction("Error", "Home");
+            }
+            return View(data);
+        }
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult Update(Product model)
+        {
+            try
+            {
+               // if (model.SupProductId !=null) model.SupProductId = null;
+                if (!ModelState.IsValid)
+                {
+                    model.SupProductId = model.SupProductId ?? null;
+                    ViewBag.ProductList = GetProductSelectList();
+                    ViewBag.CategoryList = GetCategorySelectList();
+                    return View(model);
+                }
+                if (model.SupProductId != null)
+                {
+                    model.CategoryId = new ProductRepo().GetById(model.SupProductId).CategoryId;
+                }
+                var data = new ProductRepo().GetById(model.Id);
+                data.ProductName = model.ProductName;
+                data.Barcode = model.Barcode;
+                data.BuyPrice = model.BuyPrice;
+                data.CategoryId = model.CategoryId;
+                data.Description = model.Description;
+                data.ProductType = model.ProductType;
+                data.Quantity = model.Quantity;
+                data.SalesPrice = model.SalesPrice;
+                data.SupProductId = model.SupProductId;
+
+                new ProductRepo().Update(data);
+                foreach (var dataProduct in data.Products)
+                {
+                    dataProduct.CategoryId = data.CategoryId;
+                    new ProductRepo().Update(dataProduct);
+                    if (dataProduct.Products.Any()) UpdateSubCategoryId(dataProduct.Products);
+                }
+                void UpdateSubCategoryId(ICollection<Product> dataC)
+                {
+                    foreach (var dataCategory in dataC)
+                    {
+                        dataCategory.CategoryId = data.CategoryId;
+                        new ProductRepo().Update(dataCategory);
+                        if (dataCategory.Products.Any()) UpdateSubCategoryId(dataCategory.Products);
+                    }
+                }
+                TempData["Message"] = $"{model.ProductName} isimli kategori başarıyla güncellenmiştir";
+                ViewBag.ProductList = GetProductSelectList();
+                ViewBag.CategoryList = GetCategorySelectList();
+                return View(data);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                TempData["Model"] = new ErrorViewModel()
+                {
+                    Text = $"Bir hata oluştu: {EntityHelpers.ValidationMessage(ex)}",
+                    ActionName = "Add",
+                    ControllerName = "Product",
+                    ErrorCode = 500
+                };
+                return RedirectToAction("Error", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["Model"] = new ErrorViewModel()
+                {
+                    Text = $"Bir hata oluştu: {ex.Message}",
+                    ActionName = "Add",
+                    ControllerName = "Product",
+                    ErrorCode = 500
+                };
+                return RedirectToAction("Error", "Home");
+            }
+        }
     }
 }
