@@ -81,20 +81,20 @@ namespace Admin.BLL.Repository
             DbObject.Remove(entity);
         }
 
-        public int Update()
+        public int Save()
         {
             return DbContext.SaveChanges();
         }
-        public async Task<int> UpdateAsync()
+        public async Task<int> SaveAsync()
         {
             return await DbContext.SaveChangesAsync();
         }
-        public void Update(T entity)
+        public int Update(T entity)
         {
             DbObject.Attach(entity);
             DbContext.Entry(entity).State = EntityState.Modified;
             entity.UpdatedDate = DateTime.Now;
-            this.Update();
+            return this.Save();
         }
         public void Dispose()
         {
