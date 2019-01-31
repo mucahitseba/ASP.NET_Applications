@@ -13,7 +13,7 @@ namespace Admin.DAL.Migrations
                     {
                         Id = c.Int(nullable: false, identity: true),
                         CategoryName = c.String(nullable: false, maxLength: 100),
-                        TaxRate = c.Decimal(nullable: false, precision: 3, scale: 2),
+                        TaxRate = c.Decimal(nullable: false, precision: 4, scale: 2),
                         SupCategoryId = c.Int(),
                         CreatedDate = c.DateTime(nullable: false),
                         UpdatedDate = c.DateTime(),
@@ -54,9 +54,9 @@ namespace Admin.DAL.Migrations
                     {
                         Id = c.Long(nullable: false),
                         Id2 = c.Guid(nullable: false),
-                        Quantity = c.Double(nullable: false),
-                        Price = c.Decimal(nullable: false, precision: 18, scale: 2),
-                        Discount = c.Decimal(nullable: false, precision: 18, scale: 2),
+                        Quantity = c.Decimal(nullable: false, precision: 8, scale: 4),
+                        Price = c.Decimal(nullable: false, precision: 9, scale: 3),
+                        Discount = c.Decimal(nullable: false, precision: 3, scale: 3),
                         CreatedDate = c.DateTime(nullable: false),
                         UpdatedDate = c.DateTime(),
                     })
