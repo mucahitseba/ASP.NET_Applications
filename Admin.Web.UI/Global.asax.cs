@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Admin.BLL.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -13,6 +14,7 @@ namespace Admin.Web.UI
         {
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+            new BarcodeService().Get("8690698032203");
         }
     }
 }

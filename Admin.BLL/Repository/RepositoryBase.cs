@@ -89,6 +89,10 @@ namespace Admin.BLL.Repository
         {
             return await DbContext.SaveChangesAsync();
         }
+        public IQueryable<T> Queryable()
+        {
+            return DbObject;
+        }
         public int Update(T entity)
         {
             DbObject.Attach(entity);
