@@ -96,7 +96,7 @@ namespace Admin.Web.UI.Controllers
         {
             try
             {
-               // if (model.SupProductId !=null) model.SupProductId = null;
+                // if (model.SupProductId !=null) model.SupProductId = null;
                 if (!ModelState.IsValid)
                 {
                     model.SupProductId = model.SupProductId ?? null;
@@ -192,6 +192,5 @@ namespace Admin.Web.UI.Controllers
                 }, JsonRequestBehavior.AllowGet);
             }
         }
-    }
     }
 }

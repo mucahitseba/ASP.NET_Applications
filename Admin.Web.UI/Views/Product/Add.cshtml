@@ -134,7 +134,7 @@
             $("#frmSearch").submit(function(e) {
                 e.preventDefault();
                 $.ajax({
-                    url: '@Url.Action("CheckBarcode","Product")' + "?barcode=" + $("#txtSearch").val(),
+                    url: '@Url.Action("CheckBarcode", "Product")' + "?barcode=" + $("#txtSearch").val(),
                     method: "get",
                     dataType:"json"
                 }).done(function (response) {
