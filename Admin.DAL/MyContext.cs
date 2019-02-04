@@ -1,4 +1,6 @@
 ﻿using Admin.MODELS.Entities;
+using Admin.MODELS.IdentityModels;
+using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -8,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Admin.DAL
 {
-    public class MyContext:DbContext
+    public class MyContext:IdentityDbContext<User>
     {
         public MyContext():base(nameOrConnectionString:"name=MyCon")
         {
