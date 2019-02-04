@@ -1,4 +1,7 @@
-﻿using Admin.BLL.Services;
+﻿using Admin.BLL.Identity;
+using Admin.BLL.Services;
+using Admin.MODELS.IdentityModels;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +18,18 @@ namespace Admin.Web.UI
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             new BarcodeService().Get("8690698032203");
+            var roller = new string[] { "Admin", "User" };
+            var roleManager = MembershipTools.NewRoleManager();
+            foreach (var rol in roller)
+            {
+                if (!roleManager.RoleExists(rol))
+                {
+                    roleManager.Create(new Role()
+                    {
+                        Name = rol
+                    });
+                }
+            }
         }
     }
 }
