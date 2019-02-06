@@ -11,7 +11,7 @@ using System.Web.Mvc;
 
 namespace Admin.Web.UI.Controllers
 {
-    [Authorize]
+    
     public class CategoryController : BaseController
     {
         public ActionResult Index()
@@ -19,6 +19,7 @@ namespace Admin.Web.UI.Controllers
             return View();
         }
         [HttpGet]
+        [Authorize(Roles ="Admin")]
         public ActionResult Add()
         {
             ViewBag.CategoryList = GetCategorySelectList();

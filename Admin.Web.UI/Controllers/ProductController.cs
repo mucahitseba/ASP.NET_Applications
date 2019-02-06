@@ -22,6 +22,7 @@ namespace Admin.Web.UI.Controllers
             return View();
         }
         [HttpGet]
+        
         public ActionResult Add()
         {
             ViewBag.ProductList = GetProductSelectList();
