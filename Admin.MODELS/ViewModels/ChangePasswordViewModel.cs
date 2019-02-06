@@ -22,7 +22,7 @@ namespace Admin.MODELS.ViewModels
         [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Yeni Şifre Tekrar")]
-        [Compare("Password", ErrorMessage = "Şifreler uyuşmuyor")]
+        [Compare("NewPassword", ErrorMessage = "Şifreler uyuşmuyor")]
         public string ConfirmNewPassword { get; set; }
     }
 }

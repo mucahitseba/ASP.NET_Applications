@@ -1,4 +1,6 @@
-﻿using Admin.BLL.Identity;
+﻿using Admin.BLL.Helpers;
+using Admin.BLL.Identity;
+using Admin.BLL.Services.Senders;
 using Admin.MODELS.IdentityModels;
 using Admin.MODELS.ViewModels;
 using Microsoft.AspNet.Identity;
@@ -47,7 +49,8 @@ namespace Admin.Web.UI.Controllers
                     UserName = rm.Username,
                     Email = rm.Email,
                     Name = rm.Name,
-                    Surname = rm.Surname
+                    Surname = rm.Surname,
+                    ActivationCode=StringHelpers.GetCode()
                 };
                 var result = await userManager.CreateAsync(newUser, rm.Password);
                 if (result.Succeeded)
@@ -61,6 +64,12 @@ namespace Admin.Web.UI.Controllers
                         await userManager.AddToRoleAsync(newUser.Id, "User");
                     }
                     //todo kullanıcıya mail gönderilsin
+                    string SiteUrl = Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host +
+                                     (Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port);
+
+                    var emailService = new EmailService();
+                    var body = $"Merhaba <b>{newUser.Name} {newUser.Surname}</b><br>Hesabınızı aktif etmek için aşadıdaki linke tıklayınız<br> <a href='{SiteUrl}/account/activation?code={newUser.ActivationCode}' >Aktivasyon Linki </a> ";
+                    await emailService.SendAsync(new IdentityMessage() { Body = body, Subject = "Sitemize Hoşgeldiniz" }, newUser.Email);
                 }
                 else
                 {
@@ -131,15 +140,12 @@ namespace Admin.Web.UI.Controllers
         }
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult> UserProfile()
+        public ActionResult UserProfile()
         {
-            var id = HttpContext.GetOwinContext().Authentication.User.Identity.GetUserId();
-
             try
             {
-                var userManager =MembershipTools.NewUserManager();
-                var user = await userManager.FindByIdAsync(id);
-
+                var id = HttpContext.GetOwinContext().Authentication.User.Identity.GetUserId();
+                var user = MembershipTools.NewUserManager().FindById(id);
                 var data = new ProfilePasswordViewModel()
                 {
                     UserProfileViewModel = new UserProfileViewModel()
@@ -147,8 +153,8 @@ namespace Admin.Web.UI.Controllers
                         Email = user.Email,
                         Id = user.Id,
                         Name = user.Name,
-                        Surname = user.Surname,
                         PhoneNumber = user.PhoneNumber,
+                        Surname = user.Surname,
                         UserName = user.UserName
                     }
                 };
@@ -184,14 +190,15 @@ namespace Admin.Web.UI.Controllers
 
                 user.Name = model.UserProfileViewModel.Name;
                 user.Surname = model.UserProfileViewModel.Surname;
+                user.PhoneNumber = model.UserProfileViewModel.PhoneNumber;
                 if (user.Email != model.UserProfileViewModel.Email)
                 {
-                    //todo tekrardan aktivasyon gönderilmeli ve kullanıcı rolü aktif olamayan bir kullanıcı rolüne atanmalı!
+                    //todo tekrar aktivasyon maili gönderilmeli. rolü de aktif olmamış role çevrilmeli.
                 }
                 user.Email = model.UserProfileViewModel.Email;
-                user.PhoneNumber = model.UserProfileViewModel.PhoneNumber;
+
                 await userManager.UpdateAsync(user);
-                TempData["Message"] = "Profiliniz güncellenmiştir";
+                TempData["Message"] = "Güncelleme işlemi başarılı";
                 return RedirectToAction("UserProfile");
             }
             catch (Exception ex)
@@ -206,5 +213,104 @@ namespace Admin.Web.UI.Controllers
                 return RedirectToAction("Error", "Home");
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<ActionResult> ChangePassword(ProfilePasswordViewModel model)
+        {
+            try
+            {
+                var userManager =MembershipTools.NewUserManager();
+                var id = HttpContext.GetOwinContext().Authentication.User.Identity.GetUserId();
+                var user =MembershipTools.NewUserManager().FindById(id);
+                var data = new ProfilePasswordViewModel()
+                {
+                    UserProfileViewModel = new UserProfileViewModel()
+                    {
+                        Email = user.Email,
+                        Id = user.Id,
+                        Name = user.Name,
+                        PhoneNumber = user.PhoneNumber,
+                        Surname = user.Surname,
+                        UserName = user.UserName
+                    }
+                };
+                model.UserProfileViewModel = data.UserProfileViewModel;
+                if (!ModelState.IsValid)
+                {
+                    model.ChangePasswordViewModel = new ChangePasswordViewModel();
+                    return View("UserProfile", model);
+                }
+
+
+                var result = await userManager.ChangePasswordAsync(
+                    HttpContext.GetOwinContext().Authentication.User.Identity.GetUserId(),
+                    model.ChangePasswordViewModel.OldPassword, model.ChangePasswordViewModel.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    //todo kullanıcıyı bilgilendiren bir mail atılır
+                    return RedirectToAction("Logout", "Account");
+                }
+                else
+                {
+                    var err = "";
+                    foreach (var resultError in result.Errors)
+                    {
+                        err += resultError + " ";
+                    }
+                    ModelState.AddModelError("", err);
+                    model.ChangePasswordViewModel = new ChangePasswordViewModel();
+                    return View("UserProfile", model);
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Model"] = new ErrorViewModel()
+                {
+                    Text = $"Bir hata oluştu {ex.Message}",
+                    ActionName = "UserProfile",
+                    ControllerName = "Account",
+                    ErrorCode = 500
+                };
+                return RedirectToAction("Error", "Home");
+            }
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult Activation(string code)
+        {
+            try
+            {
+                var userStore =MembershipTools.NewUserStore();
+                var user = userStore.Users.FirstOrDefault(x => x.ActivationCode == code);
+
+                if (user != null)
+                {
+                    if (user.EmailConfirmed)
+                    {
+                        ViewBag.Message = $"<span class='alert alert-success'>Bu hesap daha önce aktive edilmiştir.</span>";
+                    }
+                    else
+                    {
+                        user.EmailConfirmed = true;
+
+                        userStore.Context.SaveChanges();
+                        ViewBag.Message = $"<span class='alert alert-success'>Aktivasyon işleminiz başarılı</span>";
+                    }
+                }
+                else
+                {
+                    ViewBag.Message = $"<span class='alert alert-danger'>Aktivasyon başarısız</span>";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "<span class='alert alert-danger'>Aktivasyon işleminde bir hata oluştu</span>";
+            }
+
+            return View();
+        }
+
     }
 }
