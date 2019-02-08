@@ -7,12 +7,12 @@ namespace Admin.DAL.Migrations
     {
         public override void Up()
         {
-            AddColumn("dbo.AspNetUsers", "ActivationCode", c => c.String());
+            AddColumn("dbo.AspNetUsers", "AvatarPath", c => c.String());
         }
         
         public override void Down()
         {
-            DropColumn("dbo.AspNetUsers", "ActivationCode");
+            DropColumn("dbo.AspNetUsers", "AvatarPath");
         }
     }
 }
