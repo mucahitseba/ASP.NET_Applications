@@ -1,4 +1,5 @@
-﻿using Admin.BLL.Repository;
+﻿using Admin.BLL.Identity;
+using Admin.BLL.Repository;
 using Admin.MODELS.Entities;
 using Admin.MODELS.Enums;
 using System;
@@ -132,7 +133,37 @@ namespace Admin.Web.UI.Controllers
 
             return list;
         }
+        protected List<SelectListItem> GetUserList()
+        {
+            var data = new List<SelectListItem>();
+            MembershipTools.NewUserStore().Users
+                .ToList()
+                .ForEach(x =>
+                {
+                    data.Add(new SelectListItem()
+                    {
+                        Text = $"{x.Name} {x.Surname}",
+                        Value = x.Id
+                    });
+                });
+            return data;
+        }
 
+        protected List<SelectListItem> GetRoleList()
+        {
+            var data = new List<SelectListItem>();
+            MembershipTools.NewRoleStore().Roles
+                .ToList()
+                .ForEach(x =>
+                {
+                    data.Add(new SelectListItem()
+                    {
+                        Text = $"{x.Name}",
+                        Value = x.Id
+                    });
+                });
+            return data;
+        }
 
     }
 }

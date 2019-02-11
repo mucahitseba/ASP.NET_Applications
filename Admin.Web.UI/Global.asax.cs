@@ -1,5 +1,6 @@
 ﻿using Admin.BLL.Identity;
 using Admin.BLL.Services;
+using Admin.MODELS.Enums;
 using Admin.MODELS.IdentityModels;
 using Microsoft.AspNet.Identity;
 using System;
@@ -18,7 +19,7 @@ namespace Admin.Web.UI
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             new BarcodeService().Get("8690698032203");
-            var roller = new string[] { "Admin", "User" };
+            var roller = Enum.GetNames(typeof(IdentityRoles));
             var roleManager = MembershipTools.NewRoleManager();
             foreach (var rol in roller)
             {
