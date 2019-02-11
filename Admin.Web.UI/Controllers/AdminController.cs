@@ -71,6 +71,48 @@ namespace Admin.Web.UI.Controllers
                 });
             }
         }
+        [HttpPost]
+        public async Task<JsonResult> SendPassword(string id)
+        {
+            try
+            {
+                var userStore = NewUserStore();
+                var user = await userStore.FindByIdAsync(id);
+                if (user == null)
+                {
+                    return Json(new ResponseData()
+                    {
+                        message = "Kullanıcı bulunamadı",
+                        success = false
+                    });
+                }
+
+                var newPassword = StringHelpers.GetCode().Substring(0, 6);
+                await userStore.SetPasswordHashAsync(user, NewUserManager().PasswordHasher.HashPassword(newPassword));
+                await userStore.UpdateAsync(user);
+                userStore.Context.SaveChanges();
+
+                string SiteUrl = Request.Url.Scheme + System.Uri.SchemeDelimiter + Request.Url.Host +
+                                 (Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port);
+                var emailService = new EmailService();
+                var body = $"Merhaba <b>{user.Name} {user.Surname}</b><br>Hesabınızın parolası sıfırlanmıştır<br> Yeni parolanız: <b>{newPassword}</b> <p>Yukarıdaki parolayı kullanarak sistemize giriş yapabilirsiniz.</p>";
+                emailService.Send(new IdentityMessage() { Body = body, Subject = $"{user.UserName} Şifre Kurtarma" }, user.Email);
+
+                return Json(new ResponseData()
+                {
+                    message = "Şifre sıfırlama maili gönderilmiştir",
+                    success = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new ResponseData()
+                {
+                    message = $"Bir hata oluştu: {ex.Message}",
+                    success = false
+                });
+            }
+        }
 
     }
 }
